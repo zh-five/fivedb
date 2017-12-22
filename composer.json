@@ -1,0 +1,13 @@
+{
+    "name": "zh-five/fivedb",
+    "description": "一个基于pdo封装的数据库操作类, 支持mysql和sqlite",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Five",
+            "email": "five@v5ip.com"
+        }
+    ],
+    "require": {}
+}
