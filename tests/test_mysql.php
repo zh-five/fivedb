@@ -6,7 +6,9 @@
  * @datetime      2017/12/20 下午9:51
  */
 
-namespace Five\Test\DB;
+namespace Five\DB\Test;
+
+use Five\DB\DB;
 
 include __DIR__.'/../src/DBInterface.php';
 include __DIR__.'/../src/DB.php';

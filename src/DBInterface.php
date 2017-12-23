@@ -122,12 +122,12 @@ interface DBInterface {
      *
      * @param string $table      表名
      * @param array  $arr_where  条件数组
-     * @param bool   $is_master 是否强制查主库
-     * @param string $select_sql select 和 from 两个关键字中间的sql字符串
+     * @param bool   $is_master  是否强制查主库
+     * @param string $str_fields select 和 from 两个关键字中间的sql字符串
      *
      * @return array
      */
-    public function getTableWhereRow($table, $arr_where, $is_master = false, $select_sql = '*');
+    public function getTableWhereRow($table, $arr_where, $is_master = false, $str_fields = '*');
 
     /**
      * 根据条件组件计算结果数
@@ -142,7 +142,7 @@ interface DBInterface {
 
     /**
      * @param string $table        表名
-     * @param string $select_sql   select 和 from 两个关键字中间的sql字符串
+     * @param string $str_fields   select 和 from 两个关键字中间的sql字符串
      * @param array  $arr_where    条件数组
      * @param array  $arr_order_by 排序数组[field1, 'asc' or 'desc', field2, 'asc' or 'desc', ...]
      * @param array  $arr_limit    limit限制. [offset, num], 为空则不限制
@@ -150,7 +150,7 @@ interface DBInterface {
      *
      * @return array
      */
-    public function getTableWhereList($table, $select_sql, $arr_where, $arr_order_by, $arr_limit, $is_master = false);
+    public function getTableWhereList($table, $str_fields, $arr_where, $arr_order_by, $arr_limit, $is_master = false);
 
     /**
      * 启动一个事务

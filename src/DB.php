@@ -303,28 +303,30 @@ class DB implements DBInterface {
      * @throws DBException
      */
     public function delete($table, $arr_where) {
-        list($where_sql, $paraam) = $this->mkWhere($arr_where);
+        list($where_sql, $param) = $this->mkWhere($arr_where);
 
         $sql = "delete from {$table} {$where_sql}";
 
-        return $this->exec($sql, $paraam);
+        return $this->exec($sql, $param);
     }
 
     /**
-     * @param $table
-     * @param $arr_where
-     * @param $arr_set
+     * 修改数据
+     * 
+     * @param string $table     表名
+     * @param array  $arr_where 条件数组
+     * @param array  $arr_set   需修改的数据 
      *
      * @return mixed
      * @throws DBException
      */
     public function update($table, $arr_where, $arr_set) {
-        list($set_sql, $paraam1)   = $this->mkUpdateSet($arr_set);
-        list($where_sql, $paraam2) = $this->mkWhere($arr_where);
+        list($set_sql, $param1)   = $this->mkUpdateSet($arr_set);
+        list($where_sql, $param2) = $this->mkWhere($arr_where);
 
         $sql = "update $table $set_sql $where_sql";
 
-        return $this->exec($sql, array_merge($paraam1, $paraam2));
+        return $this->exec($sql, array_merge($param1, $param2));
     }
 
     /**
@@ -333,16 +335,16 @@ class DB implements DBInterface {
      * @param string $table      表名
      * @param array  $arr_where  条件数组
      * @param bool   $is_master  是否强制查主库
-     * @param string $select_sql select 和 from 两个关键字中间的sql字符串
+     * @param string $str_fields select 和 from 两个关键字中间的sql字符串
      *
      * @return mixed
      * @throws DBException
      */
-    public function getTableWhereRow($table, $arr_where, $is_master = false, $select_sql = '*') {
-        list($where_sql, $paraam) = $this->mkWhere($arr_where);
-        $sql = "select {$select_sql} from `$table` {$where_sql}";
+    public function getTableWhereRow($table, $arr_where, $is_master = false, $str_fields = '*') {
+        list($where_sql, $param) = $this->mkWhere($arr_where);
+        $sql = "select {$str_fields} from `$table` {$where_sql}";
 
-        return $this->fetchRow($sql, $paraam, $is_master);
+        return $this->fetchRow($sql, $param, $is_master);
     }
 
     /**
@@ -356,30 +358,32 @@ class DB implements DBInterface {
      * @throws DBException
      */
     public function getTableWhereCount($table, $arr_where, $is_master = false) {
-        list($where_sql, $paraam) = $this->mkWhere($arr_where);
+        list($where_sql, $param) = $this->mkWhere($arr_where);
         $sql = "select count(1) from `$table` {$where_sql}";
 
-        return $this->fetchOne($sql, $paraam, $is_master);
+        return $this->fetchOne($sql, $param, $is_master);
     }
 
     /**
+     * 查询多条记录
+     * 
      * @param string $table        表名
-     * @param string $select_sql   select 和 from 两个关键字中间的sql字符串
+     * @param string $str_fields   select 和 from 两个关键字中间的sql字符串
      * @param array  $arr_where    条件数组
      * @param array  $arr_order_by 排序数组[field1, 'asc' or 'desc', field2, 'asc' or 'desc', ...]
      * @param array  $arr_limit    limit限制. [offset, num], 为空则不限制
      * @param bool   $is_master    是否强制查主库
      *
-     * @return array
+     * @return array 有命中返回二维数组, 无数组则返回空数组
      * @throws DBException
      */
-    public function getTableWhereList($table, $select_sql, $arr_where, $arr_order_by, $arr_limit, $is_master = false) {
-        list($where_sql, $paraam) = $this->mkWhere($arr_where);
+    public function getTableWhereList($table, $str_fields, $arr_where, $arr_order_by, $arr_limit, $is_master = false) {
+        list($where_sql, $param) = $this->mkWhere($arr_where);
         $order_by_sql = $this->mkOrderBy($arr_order_by);
         $str_limit = $arr_limit ? sprintf('limit %d, %d',  $arr_limit[0], $arr_limit[1]) : '';
-        $sql = "select {$select_sql} from `$table` {$where_sql} $order_by_sql $str_limit";
+        $sql = "select {$str_fields} from `$table` {$where_sql} $order_by_sql $str_limit";
 
-        return $this->fetchAll($sql, $paraam, $is_master);
+        return $this->fetchAll($sql, $param, $is_master);
     }
 
     /**

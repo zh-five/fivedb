@@ -8,12 +8,12 @@
 
 namespace Five\DB\Demo\Table;
 
-class DBFactory extends \Five\DB\DBFactory {
+class DBFactory extends \Five\DB\DBFactoryAbstract {
     const DB_TEST = 'test';
 
 
     /**
-     * 覆盖此方法返回正确的配置文件路径
+     * 覆盖父类方法返回正确的配置文件路径
      * @return string
      */
     protected static function getConfFile() {

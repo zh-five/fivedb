@@ -9,7 +9,7 @@
 namespace Five\DB;
 
 
-abstract class DBFactory {
+abstract class DBFactoryAbstract {
     //const DB_TEST = 'test';
 
     /**
@@ -53,7 +53,7 @@ abstract class DBFactory {
      */
     protected static function _init($db_flag) {
         if (!self::$_arr_conf) {
-            $conf_file = self::getConfFile();
+            $conf_file = static::getConfFile();
             self::$_arr_conf = include $conf_file;
         }
 
@@ -62,7 +62,7 @@ abstract class DBFactory {
         }
         $conf = self::$_arr_conf[$db_flag];
 
-        return DB::initMysql($conf['write_host'], $conf['arr_read_host'], $conf['username'], $conf['password'], $conf['charset'], $conf['port']);
+        return DB::initMysql($conf['write_host'], $conf['arr_read_host'], $conf['database'], $conf['username'], $conf['password'], $conf['charset'], $conf['port']);
     }
 
     /**
