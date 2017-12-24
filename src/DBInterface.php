@@ -116,6 +116,8 @@ interface DBInterface {
     public function delete($table, $arr_where);
 
     public function update($table, $arr_where, $arr_set);
+    
+    public function insertFailUpdate($table, $arr_data, $arr_set);
 
     /**
      * 根据where条件获取一行数据
@@ -161,4 +163,19 @@ interface DBInterface {
      * @return \Exception | null 失败时返回异常对象, 成功时返回 null
      */
     public function beginTransaction($callback);
+
+    /**
+     * 组装where语句
+     *
+     * @param array  $arr_where 一个单元为一个逻辑条件，多个条件（单元）是and关系. 条件单元有两种模式:
+     *                          1.field_name => val  表示 'field_name = val'
+     *                          2.field_name => array(op_sign, op_val) 表示 'field_name op_sign op_val'
+     *                          举例： array('state' = 1, 'ctime' => array('>=', '1426348800'))
+     * @param bool   $is_where  是否带where关键字
+     * @param string $glue
+     *
+     * @return array
+     * @throws DBException
+     */
+    public function mkWhere($arr_where, $is_where = true, $glue = 'and');
 }

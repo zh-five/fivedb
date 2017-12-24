@@ -14,6 +14,7 @@ if (count($argv) != 4) {
     echo "\tsub_namespace: data层子命名空间.如:'Five\\DB\\Data'\n";
     echo "\tcode_dir: data层代码存储目录.'./src/Data'\n";
     echo "如: php cli_tool/create_code.php cli_tool/db.example.conf.php 'Five\Test' ./tmp\n";
+    echo "若数据库或表有增减,再次执行命令, 已生成的文件不会被修改或覆盖.只会生成新的文件\n";
     exit;
 }
 

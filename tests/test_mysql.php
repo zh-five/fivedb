@@ -26,7 +26,7 @@ class TestMysql{
      */
     protected $db = null;
     
-    function run() {
+    function run() { 
         $this->init();
         $this->connect();
         $this->create();
@@ -35,6 +35,7 @@ class TestMysql{
         $this->insert();
         $this->select();
         $this->update();
+        $this->insertFailUpdate();
         $this->transaction();
         $this->delete();
         
@@ -204,6 +205,40 @@ class TestMysql{
         echo "-- 删除\n";
         $this->db->delete($tb, $arr_where);
         print_r($this->db->getTableWhereRow($tb,  $arr_where));
+        
+    }
+
+
+    function insertFailUpdate() {
+        echo "---- insertFailUpdate\n";
+        $tb = 'aa_test';
+        $row = $this->db->getTableWhereRow($tb,  []);
+        $id = $row['id'];
+        print_r($row);
+
+        echo "-- 简单修改\n";
+        $this->db->insertFailUpdate($tb, $row, ['test'=>2]);
+        $row = $this->db->getTableWhereRow($tb,  ['id'=>$id]);
+        print_r($row);
+        
+        echo "-- 引用字段值\n";
+        $this->db->insertFailUpdate($tb, $row, ['test'=>['test + ?', [3]]]);
+        $row = $this->db->getTableWhereRow($tb,  ['id'=>$id]);
+        print_r($row);
+        
+        echo "-- 引用insert的数据(交换test和update_time的值)\n";
+        $this->db->insertFailUpdate($tb, $row, [
+            'test'        => ['values(`update_time`)', []],
+            'update_time' => ['values(`test`)', []],
+        ]);
+        $row = $this->db->getTableWhereRow($tb,  ['id'=>$id]);
+        print_r($row);
+        
+        echo "--- 写入多行\n";
+        $arr_data = [$row, $row];
+        $this->db->insertFailUpdate($tb, $arr_data, ['test'=>['test + ?', [3]]]);
+        $row = $this->db->getTableWhereRow($tb,  ['id'=>$id]);
+        print_r($row);
         
     }
     

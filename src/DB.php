@@ -260,26 +260,7 @@ class DB implements DBInterface {
      * @return mixed
      */
     public function insert($table, $arr_data, $ignore = false) {
-        $action = $ignore && $this->_driver_type == 1 ? 'INSERT IGNORE INTO' : 'INSERT INTO';
-
-        if (isset($arr_data[0]) && is_array($arr_data[0])) { //当做二维数组处理, 批量插入
-            $fields  = '(`' . implode('`,`', array_keys($arr_data[0])) . '`)';
-            $row_ask = '(' . $this->mkAskStr(count($arr_data[0])) . ')';
-
-            $arr_values = [];
-            $param      = [];
-            foreach ($arr_data as $row) {
-                $arr_values[] = $row_ask;
-                $param        = array_merge($param, array_values($row));
-            }
-            $values = implode(',', $arr_values);
-        } else { //一维数组,插入一行
-            $fields = '(`' . implode('`,`', array_keys($arr_data)) . '`)';
-            $values = '(' . $this->mkAskStr(count($arr_data)) . ')';
-            $param  = array_values($arr_data);
-        }
-
-        $sql = "$action $table $fields values $values";
+        list($sql, $param) = $this->mkInsertSql($table, $arr_data, $ignore);
 
         return $this->exec($sql, $param);
     }
@@ -321,10 +302,29 @@ class DB implements DBInterface {
      * @throws DBException
      */
     public function update($table, $arr_where, $arr_set) {
-        list($set_sql, $param1)   = $this->mkUpdateSet($arr_set);
+        list($set_part, $param1)   = $this->mkUpdateSet($arr_set);
         list($where_sql, $param2) = $this->mkWhere($arr_where);
 
-        $sql = "update $table $set_sql $where_sql";
+        $sql = "update $table set $set_part $where_sql";
+
+        return $this->exec($sql, array_merge($param1, $param2));
+    }
+
+    /**
+     * insert失败(UNIQUE索引或PRIMARY KEY中出现重复值)则update
+     * 注:sqlite 不支持
+     * 
+     * @param string $table    表名
+     * @param array  $arr_data insert数据, 同 $this->insert()参数
+     * @param array  $arr_set  update数据
+     *
+     * @return int 影响条数.0:无数据变化,1:insert成功,2:update成功
+     */
+    public function insertFailUpdate($table, $arr_data, $arr_set) {
+        list($insert_sql, $param1) = $this->mkInsertSql($table, $arr_data, false);
+        list($set_part, $param2)   = $this->mkUpdateSet($arr_set);
+        
+        $sql = "$insert_sql ON DUPLICATE KEY UPDATE $set_part";
 
         return $this->exec($sql, array_merge($param1, $param2));
     }
@@ -447,7 +447,7 @@ class DB implements DBInterface {
             }
         }
 
-        return ['set '.implode(',', $tmp), $param];
+        return [implode(',', $tmp), $param];
     }
 
     /**
@@ -463,7 +463,7 @@ class DB implements DBInterface {
      * @return array
      * @throws DBException
      */
-    protected function mkWhere($arr_where, $is_where = true, $glue = 'and') {
+    public function mkWhere($arr_where, $is_where = true, $glue = 'and') {
         $op_list = array();
         $param = array();
         foreach ($arr_where as $f => $v) {
@@ -618,5 +618,39 @@ class DB implements DBInterface {
         }
 
         return $out ? ' order by '.implode(',', $out) : '';
+    }
+
+    /**
+     * 构造 insert 语句
+     * 
+     * @param string $table    表名
+     * @param array  $arr_data 数据. [field => value, ...]
+     * @param bool   $ignore   遇重复值是否忽略插入,不报错
+     *
+     * @return array
+     */
+    protected function mkInsertSql($table, $arr_data, $ignore = false) {
+        $action = $ignore && $this->_driver_type == 1 ? 'INSERT IGNORE INTO' : 'INSERT INTO';
+
+        if (isset($arr_data[0]) && is_array($arr_data[0])) { //当做二维数组处理, 批量插入
+            $fields  = '(`' . implode('`,`', array_keys($arr_data[0])) . '`)';
+            $row_ask = '(' . $this->mkAskStr(count($arr_data[0])) . ')';
+
+            $arr_values = [];
+            $param      = [];
+            foreach ($arr_data as $row) {
+                $arr_values[] = $row_ask;
+                $param        = array_merge($param, array_values($row));
+            }
+            $values = implode(',', $arr_values);
+        } else { //一维数组,插入一行
+            $fields = '(`' . implode('`,`', array_keys($arr_data)) . '`)';
+            $values = '(' . $this->mkAskStr(count($arr_data)) . ')';
+            $param  = array_values($arr_data);
+        }
+
+        $sql = "$action $table $fields values $values";
+        
+        return [$sql, $param];
     }
 }

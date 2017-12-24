@@ -40,10 +40,23 @@ abstract class TableBaseAbstract {
      * @param array $arr_data 一维数组时插入一行, 二维是插入多行
      * @param bool  $ignore   是否忽略插入
      *
-     * @return mixed
+     * @return int 影响行数
      */
     public function insert($arr_data, $ignore = false) {
         return $this->_db->insert($this->_table, $arr_data, $ignore);
+    }
+
+    /**
+     * insert失败(UNIQUE索引或PRIMARY KEY中出现重复值)则update
+     * 注:sqlite 不支持
+     *
+     * @param array  $arr_data insert数据, 同 $this->insert()参数
+     * @param array  $arr_set  update数据
+     *
+     * @return int 影响条数.0:无数据变化,1:insert成功,2:update成功
+     */
+    public function insertFailUpdate($arr_data, $arr_set) {
+        return $this->_db->insertFailUpdate($this->_table, $arr_data, $arr_set);
     }
 
     /**
