@@ -9,5 +9,10 @@
             "email": "five@v5ip.com"
         }
     ],
-    "require": {}
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Five\\DB\\": "src\/"
+        }
+    }
 }
